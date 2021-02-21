@@ -17,6 +17,7 @@
 int A[N*N];
 int B[N*N];
 int C[N*N];
+// Q: where are the array allocated?
 
 
 // matrix functions
@@ -78,6 +79,7 @@ int main()
 
     printf("Number of Instructions: %d\nClock Cycles: %d\nCPI: %f%f\n", 
         instr_cnt, cycles_cnt, (float) cycles_cnt/instr_cnt);
+    // Q: is the number of clock cycles reasonable?
 
 
 #ifdef PRINT_MATRIX
