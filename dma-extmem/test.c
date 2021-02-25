@@ -9,11 +9,10 @@
  */
 
 #include "pmsis.h"
-#include "bsp/ram.h"
-#include "bsp/ram/hyperram.h"
+#include <bsp/bsp.h>
 
 //#define PRINT_MATRIX 
-#define N 50
+#define N 500
 
 // global variables
 int A[N];   
@@ -22,6 +21,14 @@ int B[N];
 int tempC[N];
 #else
 int tempC[2*N];
+static struct pi_task ram_write_tasks[N];
+static int count = 0;
+// Callback for asynchronous ram write
+static void end_of_tx(void *arg)
+{
+  //printf("End of %d TX \n", count);
+  count++;
+}
 #endif
 static uint32_t hyper_buff; // result on L3
 
@@ -100,14 +107,17 @@ int main()
         pi_ram_write(&ram, hyper_buff+i*N*sizeof(int), tempC, (uint32_t) N);
     }
 #else
+    int i=1;
     task_VectProdScalar(A[0], B, tempC, N );
-    for(int i=1; i<N;i++){
-        pi_ram_write(&ram, hyper_buff+i*N*sizeof(int), tempC, (uint32_t) N);
+    for(i; i<N;i++){
+        pi_ram_write_async(&ram, hyper_buff+i*N*sizeof(int), tempC, (uint32_t) N, pi_task_callback(&ram_write_tasks[i-1], end_of_tx, NULL));
         task_VectProdScalar(A[i], B, tempC, N );
     }
-    pi_ram_write(&ram, hyper_buff+(N-1)*N*sizeof(int), tempC, (uint32_t) N);    // last transfer
+    pi_ram_write_async(&ram, hyper_buff+(N-1)*N*sizeof(int), tempC, (uint32_t) N, pi_task_callback(&ram_write_tasks[i-1], end_of_tx, NULL));    // last transfer
 
-
+    while(count != i) {
+        pi_yield();
+    }
 #endif
 
     pi_perf_stop();
