@@ -82,9 +82,7 @@ int main()
 
     pi_perf_conf(
         1 << PI_PERF_CYCLES | 
-        1 << PI_PERF_INSTR  |
-        1 << PI_PERF_LD     | 1 << PI_PERF_ST     |
-        1 << PI_PERF_LD_STALL  
+        1 << PI_PERF_INSTR   
     );
 
     // measure statistics on matrix operations
