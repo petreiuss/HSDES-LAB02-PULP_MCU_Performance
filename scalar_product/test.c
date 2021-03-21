@@ -11,10 +11,9 @@
  */
 
 #include "pmsis.h"
-#include "stats.h"
 
 //#define PRINT_MATRIX // uncomment if you want to print matrix values
-#define N 128
+#define N 1024
 
 // global variables
 int a;
@@ -31,8 +30,9 @@ void task_initMat(int * array, int dim)
 
 void task_VectProdScalar(int scalarA, int* matB, int * matC, int dim)
 {
-    for(int i=0;i<dim;i++){
+    for(int i=0; i<dim; i=i+2){
         matC[i] = scalarA * matB[i];
+        matC[i+1] = scalarA * matB[i+1];
     }
 }
 
@@ -48,6 +48,7 @@ void print_matrix(int * mat, int dim)
 
 int main()
 {
+    printf("Memory Addresses: %x, %x, %x\n", &a, B ,C);
     // initialization
     a = 5; // initialize scalar value
     task_initMat(B, N); // initialize vector operand
@@ -81,7 +82,9 @@ int main()
 
     pi_perf_conf(
         1 << PI_PERF_CYCLES | 
-        1 << PI_PERF_INSTR 
+        1 << PI_PERF_INSTR  |
+        1 << PI_PERF_LD     | 1 << PI_PERF_ST     |
+        1 << PI_PERF_LD_STALL  
     );
 
     // measure statistics on matrix operations
@@ -94,6 +97,7 @@ int main()
 
     pi_perf_stop(); // stop the performance counters
 
+
     // collect an print statistics
     uint32_t instr_cnt = pi_perf_read(PI_PERF_INSTR);
     uint32_t cycles_cnt = pi_perf_read(PI_PERF_CYCLES);
@@ -101,6 +105,13 @@ int main()
 
     printf("Number of Instructions: %d\nClock Cycles: %d\nCPI: %f\n", 
         instr_cnt, cycles_cnt, cpi);
+
+    //compute the checksum
+    int checksum = 0;
+    for(int i=0;i<N;i++){
+      checksum += C[i];
+    }
+    printf("Checksum: %d\n", checksum);
 
     // return 0 
     pmsis_exit(0);
