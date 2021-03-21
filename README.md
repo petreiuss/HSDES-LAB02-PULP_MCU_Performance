@@ -20,8 +20,9 @@ git clone https://github.com/mrusci/HSDES-LAB02-PULP_MCU_Performance.git
 ~~~~~
 
 ### References
-* PULP Datasheet
-* GVOSC 
-* PMISIS
-* System Traces
+* [PULP Datasheet](https://github.com/pulp-platform/pulp/blob/master/doc/datasheet.pdf)
+* [GVSOC](https://greenwaves-technologies.com/manuals/BUILD/GVSOC/html/index.html)
+* [PMISIS APIs](https://greenwaves-technologies.com/manuals/BUILD/PMSIS_API/html/index.html)
+* [PMISIS BSP](https://greenwaves-technologies.com/manuals/BUILD/PMSIS_BSP/html/index.html)
+* [System Traces](https://gvsoc.readthedocs.io/en/latest/system_traces.html)
 
