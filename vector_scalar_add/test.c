@@ -12,7 +12,7 @@
 
 #include "pmsis.h"
 
-//#define PRINT_MATRIX // uncomment if you want to print matrix values
+//#define PRINT_VECTOR // uncomment if you want to print matrix values
 #define N 1024
 
 // global variables
@@ -28,33 +28,31 @@ void task_initMat(int * array, int dim)
     }
 }
 
-void task_VectScalarAdd(int scalarA, int* matB, int * matC, int dim)
+void task_VectScalarAdd(int scalarA, int* vecB, int * vecC, int dim)
 {
     for(int i=0; i<dim; i++){
-        matC[i] = scalarA + matB[i];
+        vecC[i] = scalarA + vecB[i];
     }
 }
 
-void print_matrix(int * mat, int dim)
+void print_vector(int * vec, int dim)
 {
     for(int i=0;i<dim;i++){
-        for(int j=0;j<dim;j++){
-            printf("%02d ", mat[i*dim+j]);
-        }
-        printf("\n");
+      printf("%02d ", vec[i]);
     }
+    printf("\n");
+
 }
 
 int main()
 {
-    printf("Memory Addresses: %x, %x, %x\n", &a, B ,C);
     // initialization
     a = 5; // initialize scalar value
     task_initMat(B, N); // initialize vector operand
 
-#ifdef PRINT_MATRIX
+#ifdef PRINT_VECTOR
     printf("\n\nThis is the Matrix B\n");
-    print_matrix(B, N);
+    print_vector(B, N);
 #endif
 
     /* 
