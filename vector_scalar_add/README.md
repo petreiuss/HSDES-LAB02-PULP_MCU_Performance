@@ -61,17 +61,21 @@ To read the trace output, you can refer to the following syntax:
 <timestamp> <cycles> <path> <address> <instruction> <operands> <operands info>
 ```
 where:
-* <timestamp> is the timestamp of the event in picoseconds
-* <cycles> is the number of cycles
-* <path> is the path in the architecture where the event occurred
-* <address> is the address of the instruction
-* <instruction> is the instruction label
-* <operands> is the part of the decoded operands
-* <operands info> is giving details about the operands values and how they are used
+* \<timestamp\> is the timestamp of the event in picoseconds
+* \<cycles\> is the number of cycles
+* \<path\> is the path in the architecture where the event occurred
+* \<address\> is the address of the instruction
+* \<instruction\> is the instruction label
+* \<operands\> is the part of the decoded operands
+* \<operands info\> is giving details about the operands values and how they are used
 
 The timestamp is absolute. The cycle count is local to the frequency domain.
 
 ## Optimizing the code 
+Comment out in the Makefile the following flag:
+```
+# APP_CFLAGS += -mnohwloop
+```
+What happened to the system performance? Can we further improve the CPI?
 
 
-## Try on your own
