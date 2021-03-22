@@ -28,11 +28,10 @@ void task_initMat(int * array, int dim)
     }
 }
 
-void task_VectProdScalar(int scalarA, int* matB, int * matC, int dim)
+void task_VectScalarAdd(int scalarA, int* matB, int * matC, int dim)
 {
-    for(int i=0; i<dim; i=i+2){
-        matC[i] = scalarA * matB[i];
-        matC[i+1] = scalarA * matB[i+1];
+    for(int i=0; i<dim; i++){
+        matC[i] = scalarA + matB[i];
     }
 }
 
@@ -90,7 +89,7 @@ int main()
     pi_perf_start();
 
     // task to profile
-    task_VectProdScalar(a, B, C, N);
+    task_VectScalarAdd(a, B, C, N);
 
 
     pi_perf_stop(); // stop the performance counters
