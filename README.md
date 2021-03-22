@@ -7,7 +7,7 @@ The goals of this lab session are:
 4) PMISIS BSP: dealing with external RAM devices using uDMA and the peripherals (i.e. HyperBus)
 5) Double Buffering optimization exploiting the uDMA
 
-A final assignment is described [here]()
+A final assignment is described [here](https://github.com/EEESlab/HSDES-LAB02-PULP_MCU_Performance/blob/main/lab_assignment/README.md)
 
 
 ## Getting Started
@@ -16,7 +16,7 @@ Remember also to source the PULP-SDK configuration script.
 ~~~~~shell
 source /pulp/sourceme.sh
 cd <working_dir>
-git clone https://github.com/mrusci/HSDES-LAB02-PULP_MCU_Performance.git
+git clone https://github.com/EEESlab/HSDES-LAB02-PULP_MCU_Performance.git
 ~~~~~
 
 ### References
