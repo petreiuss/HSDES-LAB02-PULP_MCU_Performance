@@ -155,7 +155,7 @@ int main()
         // compute the next output
         task_VectProdScalar(A[i_curr], B, &tempC[N*buffer_id], N);
         
-        // wait the previous transfer to complete before launcing the next one
+        // wait the previous transfer to complete before launching the next one
         while(ram_returns != i_curr) {
             pi_yield(); // go to idle if not until an event (enf of write) is detected
         }
