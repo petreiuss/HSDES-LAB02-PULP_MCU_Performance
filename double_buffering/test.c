@@ -36,7 +36,7 @@ static uint32_t C_ptr_L3;
     int tempC[N];
 #else
     int tempC[2*N];
-    static struct pi_task ram_write_tasks[N];
+    static struct pi_task ram_write_task;
     static int ram_returns = 0;
     // Callback for asynchronous ram write
     static void end_of_tx(void *arg)
@@ -79,6 +79,7 @@ void print_vector(int * vec, int dim)
 // main function
 int main()
 {
+    printf("**** This is the Double Buffering Example! ****\n");
     // Init & open external device ram
     pi_hyperram_conf_init(&conf);
     pi_open_from_conf(&ram, &conf);
@@ -108,7 +109,7 @@ int main()
 
     //initialize performance counters
     pi_perf_conf(
-        1 << PI_PERF_CYCLES | 
+        1 << PI_PERF_CYCLES |  1 << PI_PERF_ACTIVE_CYCLES |
         1 << PI_PERF_INSTR 
     );
 
@@ -119,34 +120,49 @@ int main()
 
     /* task to measure  */
 
-    
+
 #ifndef DOUBLE_BUFFERING
 
     // compute the output matrix as the composition of N vector of size N
     for(int i=0; i<N;i++){
         task_VectProdScalar(A[i], B, tempC, N); // the N-th output vector is stored in tempC
         // tempC is written in RAM at a given location
-        // pi_ram_write is a blocking function
+        // pi_ram_write is a blocking function and the FC idles until the transfer completes
         // check: https://greenwaves-technologies.com/manuals/BUILD/PMSIS_BSP/html/group__Ram.html
         pi_ram_write(&ram, C_ptr_L3+(i*N_BYTE), tempC, (uint32_t) N_BYTE);
     }
 
 #else
     
-    int i_curr=1;
-    int i_prev=0;
-    int buffer_id;
-    task_VectProdScalar(A[0], B, tempC, N);
-    for(i_curr; i_curr<N;i_curr++){
-        buffer_id = i_curr & 0x1;
-        pi_ram_write_async(&ram, C_ptr_L3+(i_prev*N_BYTE), &tempC[N*(1-buffer_id)], (uint32_t) N_BYTE, pi_task_callback(&ram_write_tasks[i_prev], end_of_tx, NULL));
+    int i_curr=0;   // index of the current output vector row under processing
+    int i_prev=0;   // index of the previous output vector row under processing
+
+    int buffer_id = 0;  // id of the temporary buffer: can be 0 or 1
+
+    // launche the 
+    task_VectProdScalar(A[i_curr], B, &tempC[buffer_id], N);
+    i_curr++;
+
+
+    for(i_curr; i_curr<N; i_curr++,i_prev++){
+
+        // compute the buffer ID as the last bit of the i_curr
+        // *   buffer_id: used to store the output of the fucntion
+        // * 1-buffer_id: trasffered to memory
+        buffer_id = i_curr & 0x1;   
+        // launch the trasnfer of the previously computed output 
+        pi_ram_write_async(&ram, C_ptr_L3+(i_prev*N_BYTE), &tempC[N*(1-buffer_id)], (uint32_t) N_BYTE, pi_task_callback(&ram_write_task, end_of_tx, NULL));
+        // compute the next output
         task_VectProdScalar(A[i_curr], B, &tempC[N*buffer_id], N);
-        i_prev++;
+        
+        // wait the previous transfer to complete before launcing the next one
         while(ram_returns != i_curr) {
-            pi_yield();
+            pi_yield(); // go to idle until a new event is detected
         }
     }
-    pi_ram_write_async(&ram, C_ptr_L3+i_prev*N_BYTE, &tempC[N*buffer_id], (uint32_t) N_BYTE, pi_task_callback(&ram_write_tasks[i_prev], end_of_tx, NULL));    // last transfer
+
+    // write the last chuck of data
+    pi_ram_write_async(&ram, C_ptr_L3+(N-1)*N_BYTE, &tempC[N*buffer_id], (uint32_t) N_BYTE, pi_task_callback(&ram_write_task, end_of_tx, NULL));    // last transfer
 
     while(ram_returns != i_curr) {
         pi_yield();
@@ -158,10 +174,11 @@ int main()
 
     // collect and print statistics
     uint32_t instr_cnt = pi_perf_read(PI_PERF_INSTR);
+    uint32_t act_cycles_cnt = pi_perf_read(PI_PERF_ACTIVE_CYCLES);
     uint32_t cycles_cnt = pi_perf_read(PI_PERF_CYCLES);
 
-    printf("Number of Instructions: %d\nClock Cycles: %d\nCPI: %f%f\n", 
-        instr_cnt, cycles_cnt, (float) cycles_cnt/instr_cnt);
+    printf("Number of Instructions: %d\nClock Cycles: %d\nActive Clock Cycles: %d\nCPI: %f\n", 
+        instr_cnt, cycles_cnt, act_cycles_cnt, (float) cycles_cnt/instr_cnt);
 
 #ifdef CHECK_RESULTS
     // read back and check results
