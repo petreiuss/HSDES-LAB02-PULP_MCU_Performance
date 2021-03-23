@@ -105,6 +105,7 @@ int main()
     printf("\n\nThis is the Vector B\n");
     print_vector(B, N);
 #endif
+
     //initialize performance counters
     pi_perf_conf(
         1 << PI_PERF_CYCLES | 
@@ -116,20 +117,29 @@ int main()
     pi_perf_start();
 
 
-    // task to measure
+    /* task to measure  */
+
+    
 #ifndef DOUBLE_BUFFERING
+
+    // compute the output matrix as the composition of N vector of size N
     for(int i=0; i<N;i++){
-        task_VectProdScalar(A[i], B, tempC, N);
-        pi_ram_write(&ram, C_ptr_L3+i*N_BYTE, tempC, (uint32_t) N_BYTE);
+        task_VectProdScalar(A[i], B, tempC, N); // the N-th output vector is stored in tempC
+        // tempC is written in RAM at a given location
+        // pi_ram_write is a blocking function
+        // check: https://greenwaves-technologies.com/manuals/BUILD/PMSIS_BSP/html/group__Ram.html
+        pi_ram_write(&ram, C_ptr_L3+(i*N_BYTE), tempC, (uint32_t) N_BYTE);
     }
+
 #else
+    
     int i_curr=1;
     int i_prev=0;
     int buffer_id;
     task_VectProdScalar(A[0], B, tempC, N);
     for(i_curr; i_curr<N;i_curr++){
         buffer_id = i_curr & 0x1;
-        pi_ram_write_async(&ram, C_ptr_L3+i_prev*N_BYTE, &tempC[N*(1-buffer_id)], (uint32_t) N_BYTE, pi_task_callback(&ram_write_tasks[i_prev], end_of_tx, NULL));
+        pi_ram_write_async(&ram, C_ptr_L3+(i_prev*N_BYTE), &tempC[N*(1-buffer_id)], (uint32_t) N_BYTE, pi_task_callback(&ram_write_tasks[i_prev], end_of_tx, NULL));
         task_VectProdScalar(A[i_curr], B, &tempC[N*buffer_id], N);
         i_prev++;
         while(ram_returns != i_curr) {
@@ -141,6 +151,7 @@ int main()
     while(ram_returns != i_curr) {
         pi_yield();
     }
+
 #endif
 
     pi_perf_stop();
