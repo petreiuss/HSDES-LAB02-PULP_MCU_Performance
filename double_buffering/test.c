@@ -157,7 +157,7 @@ int main()
         
         // wait the previous transfer to complete before launcing the next one
         while(ram_returns != i_curr) {
-            pi_yield(); // go to idle until a new event is detected
+            pi_yield(); // go to idle if not until an event (enf of write) is detected
         }
     }
 
