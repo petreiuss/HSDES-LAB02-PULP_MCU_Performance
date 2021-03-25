@@ -3,7 +3,7 @@
 The goals of this lab session are:
 1) Understand how to measure performance statistics on the PULP platform.
 2) Profiling Tools (System Traces and [VCD](https://en.wikipedia.org/wiki/Value_change_dump) Traces)
-3) Introduction to PMSIS low-lovel SW libraries
+3) Introduction to PMSIS low-level SW libraries
 4) PMISIS BSP: dealing with external RAM devices using uDMA and the peripherals (i.e. HyperBus)
 5) Double Buffering optimization exploiting the uDMA
 
