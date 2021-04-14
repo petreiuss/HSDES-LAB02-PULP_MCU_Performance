@@ -18,8 +18,8 @@ Eventually, the function should return the minimal L2 distance and the index of 
 * The dataset should be allocated and initialized with deterministic rules. For instance you may refer to the following pseudo-code:
 ```
 for i=0:1M
-  x[i] = i % 2^15
-  y[i] = 
+  x[i] = i % 2^14
+  y[i] = i % 2^14
 ```
 note that % 2^15 constraints the value of the vector coordinates to be within the range of an _short int_ variable.
 
